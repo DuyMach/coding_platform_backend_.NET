@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using api.Enums;
 using api.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace api.Data
 {
@@ -21,6 +23,11 @@ namespace api.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Tag>()
+                .Property(t => t.TagName)
+                .HasConversion(
+                    new EnumToStringConverter<TagName>()
+                 );
             modelBuilder.Entity<ProblemTag>()
                 .HasKey(pt => new { pt.ProblemId, pt.TagId });
 
