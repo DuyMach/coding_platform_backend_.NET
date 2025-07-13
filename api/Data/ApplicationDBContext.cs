@@ -23,6 +23,16 @@ namespace api.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Problem>()
+                .Property(p => p.Difficulty)
+                .HasConversion(
+                    new EnumToStringConverter<Difficulty>()
+                 );
+            modelBuilder.Entity<Problem>()
+                .Property(p => p.Visibility)
+                .HasConversion(
+                    new EnumToStringConverter<Visibility>()
+                 );
             modelBuilder.Entity<Tag>()
                 .Property(t => t.TagName)
                 .HasConversion(
