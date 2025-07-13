@@ -1,0 +1,38 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using api.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace api.Data
+{
+    public class ApplicationDBContext : DbContext
+    {
+        public ApplicationDBContext(DbContextOptions dbContextOptions) : base(dbContextOptions)
+        {
+
+        }
+
+        public DbSet<Problem> Problems { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<ProblemTag> ProblemTags { get; set; }
+        public DbSet<TestCase> TestCases { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ProblemTag>()
+                .HasKey(pt => new { pt.ProblemId, pt.TagId });
+
+            modelBuilder.Entity<ProblemTag>()
+                .HasOne(pt => pt.Problem)
+                .WithMany(p => p.ProblemTags)
+                .HasForeignKey(pt => pt.ProblemId);
+
+            modelBuilder.Entity<ProblemTag>()
+                .HasOne(pt => pt.Tag)
+                .WithMany(t => t.ProblemTags)
+                .HasForeignKey(pt => pt.TagId);
+        }
+    }
+}
