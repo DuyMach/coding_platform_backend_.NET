@@ -3,6 +3,7 @@ using api.DTO.Tag;
 using api.Mappers;
 using api.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers
 {
@@ -18,28 +19,30 @@ namespace api.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         { 
-            var tags = _context.Tags.ToList();
+            var tags = await _context.Tags.ToListAsync();
 
-            return Ok(tags);
+            var tagDtos = tags.Select(t => t.ToTagDetailsDto());
+
+            return Ok(tagDtos);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById([FromRoute] int id)
+        public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var tag = _context.Tags.Find(id);
+            var tag = await _context.Tags.FindAsync(id);
 
             if (tag == null)
             {
                 return NotFound();
             }
 
-            return Ok(tag);
+            return Ok(tag.ToTagDetailsDto());
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] CreateTagRequestDto createTagRequestDto)
+        public async Task<IActionResult> Create([FromBody] CreateTagRequestDto createTagRequestDto)
         {
             if (createTagRequestDto == null)
             {
@@ -48,21 +51,21 @@ namespace api.Controllers
 
             var tagModel = createTagRequestDto.ToTagFromCreateDto();
 
-            _context.Tags.Add(tagModel);
-            _context.SaveChanges();
+            await _context.Tags.AddAsync(tagModel);
+            await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetById), new { id = tagModel.Id }, tagModel.ToTagDetailsDto());
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update([FromRoute] int id,[FromBody] UpdateTagRequestDto updateTagRequestDto)
+        public async Task<IActionResult> Update([FromRoute] int id,[FromBody] UpdateTagRequestDto updateTagRequestDto)
         { 
             if (updateTagRequestDto == null)
             {
                 return BadRequest("Tag data is required.");
             }
 
-            var tagModel = _context.Tags.FirstOrDefault(t => t.Id == id);
+            var tagModel = await _context.Tags.FirstOrDefaultAsync(t => t.Id == id);
 
             if (tagModel == null)
             {
@@ -70,15 +73,15 @@ namespace api.Controllers
             }
 
             tagModel.TagName = updateTagRequestDto.TagName;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Ok(tagModel.ToTagDetailsDto());
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete([FromRoute] int id)
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var tagModel = _context.Tags.FirstOrDefault(t => t.Id == id);
+            var tagModel = await _context.Tags.FirstOrDefaultAsync(t => t.Id == id);
 
             if (tagModel == null)
             {

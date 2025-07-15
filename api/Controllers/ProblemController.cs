@@ -6,6 +6,7 @@ using api.Data;
 using api.DTO.Problem;
 using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers
 {
@@ -20,9 +21,9 @@ namespace api.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var problems = _context.Problems.ToList();
+            var problems = await _context.Problems.ToListAsync();
 
             var problemDetailsDtos = problems.Select(p => p.ToProblemDetailsDto());
 
@@ -30,20 +31,20 @@ namespace api.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById([FromRoute] int id)
+        public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var problem = _context.Problems.Find(id);
+            var problem = await _context.Problems.FindAsync(id);
 
             if (problem == null)
             {
                 return NotFound();
             }
 
-            return Ok(problem);
+            return Ok(problem.ToProblemDetailsDto());
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] CreateProblemRequestDto createProblemRequestDto)
+        public async Task<IActionResult> Create([FromBody] CreateProblemRequestDto createProblemRequestDto)
         { 
             if (createProblemRequestDto == null)
             {
@@ -51,16 +52,16 @@ namespace api.Controllers
             }
 
             var problemModel = createProblemRequestDto.ToProblemFromCreateDto();
-            _context.Problems.Add(problemModel);
-            _context.SaveChanges();
+            await _context.Problems.AddAsync(problemModel);
+            await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetById), new { id = problemModel.Id }, problemModel.ToProblemDetailsDto());
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update([FromRoute] int id, [FromBody] UpdateProblemRequestDto updateProblemRequestDto)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateProblemRequestDto updateProblemRequestDto)
         {
-            var problemModel = _context.Problems.FirstOrDefault(p => p.Id == id);
+            var problemModel = await _context.Problems.FirstOrDefaultAsync(p => p.Id == id);
 
             if (problemModel == null)
             {
@@ -73,23 +74,24 @@ namespace api.Controllers
             problemModel.Visibility = updateProblemRequestDto.Visibility;
             problemModel.UpdatedOn = DateTime.Now;
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Ok(problemModel.ToProblemDetailsDto());
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete([FromRoute] int id)
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var problemModel = _context.Problems.FirstOrDefault(p => p.Id == id);
+            var problemModel = await _context.Problems.FirstOrDefaultAsync(p => p.Id == id);
 
             if (problemModel == null)
             { 
                 return NotFound();
             }
 
+            // No RemoveAsync in DbSet definition, using Remove instead
             _context.Problems.Remove(problemModel);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
