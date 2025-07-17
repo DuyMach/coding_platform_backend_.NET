@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
 using api.DTO.Problem;
+using api.Interfaces;
 using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,15 +16,18 @@ namespace api.Controllers
     public class ProblemController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
-        public ProblemController(ApplicationDBContext context)
+        private readonly IProblemRepository _problemRepository;
+
+        public ProblemController(ApplicationDBContext context, IProblemRepository problemRepository)
         {
             _context = context;
+            _problemRepository = problemRepository;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var problems = await _context.Problems.ToListAsync();
+            var problems = await _problemRepository.GetAllAsync();
 
             var problemDetailsDtos = problems.Select(p => p.ToProblemDetailsDto());
 
@@ -33,7 +37,7 @@ namespace api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var problem = await _context.Problems.FindAsync(id);
+            var problem = await _problemRepository.GetByIdAsync(id);
 
             if (problem == null)
             {
@@ -52,8 +56,7 @@ namespace api.Controllers
             }
 
             var problemModel = createProblemRequestDto.ToProblemFromCreateDto();
-            await _context.Problems.AddAsync(problemModel);
-            await _context.SaveChangesAsync();
+            await _problemRepository.CreateAsync(problemModel);
 
             return CreatedAtAction(nameof(GetById), new { id = problemModel.Id }, problemModel.ToProblemDetailsDto());
         }
@@ -61,20 +64,12 @@ namespace api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateProblemRequestDto updateProblemRequestDto)
         {
-            var problemModel = await _context.Problems.FirstOrDefaultAsync(p => p.Id == id);
+            var problemModel = await _problemRepository.UpdateAsync(id, updateProblemRequestDto);
 
             if (problemModel == null)
             {
                 return NotFound();
             }
-
-            problemModel.Title = updateProblemRequestDto.Title;
-            problemModel.Description = updateProblemRequestDto.Description;
-            problemModel.Difficulty = updateProblemRequestDto.Difficulty;
-            problemModel.Visibility = updateProblemRequestDto.Visibility;
-            problemModel.UpdatedOn = DateTime.Now;
-
-            await _context.SaveChangesAsync();
 
             return Ok(problemModel.ToProblemDetailsDto());
         }
@@ -82,16 +77,12 @@ namespace api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var problemModel = await _context.Problems.FirstOrDefaultAsync(p => p.Id == id);
+            var problemModel = await _problemRepository.DeleteAsync(id);
 
             if (problemModel == null)
             { 
                 return NotFound();
             }
-
-            // No RemoveAsync in DbSet definition, using Remove instead
-            _context.Problems.Remove(problemModel);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }
