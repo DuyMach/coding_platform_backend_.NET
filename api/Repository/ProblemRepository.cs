@@ -47,6 +47,11 @@ namespace api.Repository
             return await _context.Problems.FirstOrDefaultAsync(p => p.Id == id);
         }
 
+        public async Task<bool> ProblemExists(int id)
+        {
+            return await _context.Problems.AnyAsync(p => p.Id == id);
+        }
+
         public async Task<Problem?> UpdateAsync(int id, UpdateProblemRequestDto updateProblemRequestDto)
         {
             var existingProblem = await _context.Problems.FindAsync(id);

@@ -38,6 +38,11 @@ namespace api.Data
                 .HasConversion(
                     new EnumToStringConverter<TagName>()
                  );
+            modelBuilder.Entity<TestCase>()
+                .Property(p => p.LanguageName)
+                .HasConversion(
+                    new EnumToStringConverter<LanguageName>()
+                );
             modelBuilder.Entity<ProblemTag>()
                 .HasKey(pt => new { pt.ProblemId, pt.TagId });
 

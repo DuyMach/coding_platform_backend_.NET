@@ -10,5 +10,6 @@ namespace api.Interfaces
         Task<Problem> CreateAsync(Problem problemModel);
         Task<Problem?> UpdateAsync(int id, UpdateProblemRequestDto updateProblemRequestDto);
         Task<Problem?> DeleteAsync(int id);
+        Task<bool> ProblemExists(int id);
     }
 }
