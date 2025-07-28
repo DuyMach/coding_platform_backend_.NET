@@ -15,7 +15,8 @@ namespace api.Mappers
                 CreatedOn = problemModel.CreatedOn,
                 UpdatedOn = problemModel.UpdatedOn,
                 Difficulty = problemModel.Difficulty,
-                Visibility = problemModel.Visibility
+                Visibility = problemModel.Visibility,
+                TestCases = problemModel.TestCases.Select(tc => tc.ToTestCaseDetailsDto()).ToList(),
             };
         }
 

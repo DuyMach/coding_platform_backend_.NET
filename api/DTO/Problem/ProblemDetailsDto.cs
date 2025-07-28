@@ -1,4 +1,5 @@
-﻿using api.Enums;
+﻿using api.DTO.TestCase;
+using api.Enums;
 
 namespace api.DTO.Problem
 {
@@ -11,5 +12,6 @@ namespace api.DTO.Problem
         public DateTime UpdatedOn { get; set; }
         public Difficulty Difficulty { get; set; }
         public Visibility Visibility { get; set; }
+        public List<TestCaseDetailsDto> TestCases { get; set; }
     }
 }
