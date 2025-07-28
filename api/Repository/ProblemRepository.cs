@@ -39,12 +39,16 @@ namespace api.Repository
 
         public async Task<ICollection<Problem>> GetAllAsync()
         {
-            return await _context.Problems.ToListAsync();
+            return await _context.Problems
+                .Include(p => p.TestCases)
+                .ToListAsync();
         }
 
         public async Task<Problem?> GetByIdAsync(int id)
         {
-            return await _context.Problems.FirstOrDefaultAsync(p => p.Id == id);
+            return await _context.Problems
+                .Include (p => p.TestCases)
+                .FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task<bool> ProblemExists(int id)
