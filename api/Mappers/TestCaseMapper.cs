@@ -27,6 +27,7 @@ namespace api.Mappers
             return new TestCaseDetailsDto
             {
                 Id = testCase.Id,
+                Input = testCase.Input,
                 ExpectedOutput = testCase.ExpectedOutput,
                 Explanation = testCase.Explanation,
                 IsSample = testCase.IsSample,
