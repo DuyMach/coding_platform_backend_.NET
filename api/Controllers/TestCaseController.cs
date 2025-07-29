@@ -22,7 +22,7 @@ namespace api.Controllers
             _testCaseRepository = testCaseRepository;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var testCaseModel = await _testCaseRepository.GetByIdAsync(id);
@@ -35,9 +35,14 @@ namespace api.Controllers
             return Ok(testCaseModel.ToTestCaseDetailsDto());
         }
 
-        [HttpPost("{problemId}")]
+        [HttpPost("{problemId:int}")]
         public async Task<IActionResult> Create([FromRoute] int problemId, [FromBody] CreateTestCaseRequestDto requestDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             if (!await _problemRepository.ProblemExists(problemId))
             {
                 return BadRequest("Problem does not exist.");
@@ -59,9 +64,14 @@ namespace api.Controllers
             return Ok(testCaseDetailsDto);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> Update([FromRoute] int id, UpdateTestCaseRequestDto updateTestCaseRequestDto)
-        { 
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var testCaseModel = await _testCaseRepository.UpdateAsync(id, updateTestCaseRequestDto);
 
             if (testCaseModel == null)
@@ -72,7 +82,7 @@ namespace api.Controllers
             return Ok(testCaseModel.ToTestCaseDetailsDto());
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         { 
             var testCaseModel = await _testCaseRepository.DeleteAsync(id);

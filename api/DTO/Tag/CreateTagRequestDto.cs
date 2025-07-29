@@ -1,4 +1,5 @@
 ﻿using api.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace api.DTO.Tag
 {
