@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
 using api.DTO.Problem;
+using api.Enums;
 using api.Interfaces;
 using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +35,7 @@ namespace api.Controllers
             return Ok(problemDetailsDtos);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var problem = await _problemRepository.GetByIdAsync(id);
@@ -49,7 +50,12 @@ namespace api.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateProblemRequestDto createProblemRequestDto)
-        { 
+        {
+            if (!ModelState.IsValid) 
+            {
+                return BadRequest(ModelState);
+            }
+
             if (createProblemRequestDto == null)
             {
                 return BadRequest("Problem data is required.");
@@ -61,9 +67,14 @@ namespace api.Controllers
             return CreatedAtAction(nameof(GetById), new { id = problemModel.Id }, problemModel.ToProblemDetailsDto());
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateProblemRequestDto updateProblemRequestDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var problemModel = await _problemRepository.UpdateAsync(id, updateProblemRequestDto);
 
             if (problemModel == null)
@@ -74,7 +85,7 @@ namespace api.Controllers
             return Ok(problemModel.ToProblemDetailsDto());
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             var problemModel = await _problemRepository.DeleteAsync(id);
